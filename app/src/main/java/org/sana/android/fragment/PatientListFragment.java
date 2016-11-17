@@ -48,8 +48,10 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AlphabetIndexer;
+import android.widget.FilterQueryProvider;
 import android.widget.ImageView;
 import android.widget.ListView;
+import android.widget.SearchView;
 import android.widget.SectionIndexer;
 import android.widget.TextView;
 
@@ -79,6 +81,23 @@ public class PatientListFragment extends ListFragment implements LoaderCallbacks
     private boolean doSync = false;
     private int delta =1000*60;
     private ScrollCompleteListener mScrollListener = null;
+    private static SearchView searchView;
+
+    final private SearchView.OnQueryTextListener queryListener = new SearchView.OnQueryTextListener() {
+
+        @Override
+        public boolean onQueryTextChange(String newText) {
+            // Called when the search text has changed.
+            String newFilter = !TextUtils.isEmpty(newText) ? newText : null;
+            Log.d(TAG, "newFilter: " + newFilter);
+            mAdapter.getFilter().filter(newFilter);
+            return true;
+        }
+        @Override
+        public boolean onQueryTextSubmit(String query) {
+            return true;
+        }
+    };
 
     //
     // Activity Methods
@@ -98,7 +117,13 @@ public class PatientListFragment extends ListFragment implements LoaderCallbacks
     public void onActivityCreated(Bundle savedInstanceState) {
     	Log.d(TAG, "onActivityCreated()");
         super.onActivityCreated(savedInstanceState);
-        
+
+
+        searchView = (SearchView)getActivity().findViewById(R.id.searchPat);
+        Log.d(TAG, "searchView: " + searchView);
+        searchView.setOnQueryTextListener(queryListener);
+
+
         // signal the dispatcher to sync
         mUri = getActivity().getIntent().getData();
         if (mUri == null) {
@@ -113,6 +138,27 @@ public class PatientListFragment extends ListFragment implements LoaderCallbacks
         //sync(getActivity(), Subjects.CONTENT_URI);
     	LoaderManager.enableDebugLogging(true);
         getActivity().getSupportLoaderManager().initLoader(PATIENTS_LOADER, null, this);
+
+        // Set what should happen when a "filter()" call is made to this adapter:
+        mAdapter.setFilterQueryProvider(new FilterQueryProvider() {
+            public Cursor runQuery(CharSequence constraint) {
+                Log.d(TAG, "Running filtering on constraint: "+constraint);
+                Cursor cur;
+                if ( constraint != null && constraint.length() > 0) {
+                    //If the filter is not null or empty, then change the selection and selection_args
+                    // parameters to find patients whose given or family name or ID start with the search term:
+                    cur = getActivity().getContentResolver().query(mUri, mProjection,
+                            "given_name LIKE ? OR family_name LIKE ? OR system_id LIKE ?",
+                            new String[]{constraint + "%", constraint + "%", constraint + "%"},
+                            Patients.GIVEN_NAME_SORT_ORDER);
+                } else {
+                    // If the constraint is null, then keep the query the same as before
+                    cur = getActivity().getContentResolver().query(mUri, mProjection, null, null,
+                            Patients.GIVEN_NAME_SORT_ORDER);
+                }
+                return cur; //now your adapter will have the new filtered content
+            }
+        });
     }
 
     /** {@inheritDoc} */

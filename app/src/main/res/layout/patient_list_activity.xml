@@ -1,41 +1,54 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-              xmlns:tools="http://schemas.android.com/tools" android:id="@+id/root_patient_list"
+    xmlns:tools="http://schemas.android.com/tools" android:id="@+id/root_patient_list"
     android:layout_width="match_parent"
     android:layout_height="fill_parent"
-    android:orientation="vertical" >
+    android:orientation="vertical"
+    android:weightSum="1">
+
+    <LinearLayout
+        android:orientation="vertical"
+        android:layout_width="match_parent"
+        android:layout_height="46dp">
+
+        <SearchView
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:background="@color/grey_medium"
+            android:queryHint="Search Patients..."
+            android:id="@+id/searchPat" />
+    </LinearLayout>
 
     <fragment
         android:id="@+id/patient_list_fragment"
         android:layout_width="match_parent"
-        android:layout_height="fill_parent"
+        android:layout_height="350dp"
         class="org.sana.android.fragment.PatientListFragment"
         tools:layout="@layout/fragment_patient_list"
-        android:layout_weight="1"/>
+        android:layout_weight="0.99" />
 
     <LinearLayout
         android:id="@+id/menu"
         android:orientation="horizontal"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_weight="1"
+        android:layout_height="46dp"
         android:measureWithLargestChild="false" android:longClickable="false">
 
         <ImageButton
-            android:layout_width="fill_parent"
             android:layout_height="wrap_content"
             android:id="@+id/register"
-            android:layout_weight="0.5"
             android:minHeight="96dip"
-            android:src="@drawable/ic_menu_invite" android:onClick="submit"/>
+            android:src="@drawable/ic_menu_invite" android:onClick="submit"
+            android:layout_weight="0.52"
+            android:layout_width="wrap_content" />
 
         <ImageButton
-            android:layout_width="fill_parent"
             android:layout_height="wrap_content"
             android:id="@+id/sync"
             android:layout_weight="0.5"
             android:minHeight="96dip"
-            android:src="@drawable/ic_menu_refresh" android:onClick="submit"/>
+            android:src="@drawable/ic_menu_refresh" android:onClick="submit"
+            android:layout_width="wrap_content" />
     </LinearLayout>
 
 </LinearLayout>
